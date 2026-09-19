@@ -391,53 +391,95 @@
       background: rgba(94,230,168,.075);
     }
 
-    /* Responsive : l'application tient dans le viewport,
-       sans défilement vertical ou horizontal. */
 
-    html,
-    body {
-      width: 100%;
-      height: 100%;
-      min-height: 100%;
-      overflow: hidden;
-    }
+    /* =========================================================
+       MOBILE / TABLET — NATURAL PAGE SCROLL
+       Desktop stays locked to the viewport.
+       Mobile/tablet use normal document flow so iOS Safari,
+       Android and tablets can scroll to the action buttons.
+       ========================================================= */
 
-    body {
-      min-height: 100svh;
-      height: 100svh;
-      padding: clamp(10px, 2vw, 28px);
-    }
 
-    .app {
-      width: min(1040px, 100%);
-      max-height: calc(100svh - clamp(20px, 4vw, 56px));
-      min-width: 0;
-      min-height: 0;
-    }
-
-    .card {
-      min-height: 0;
-      max-height: calc(100svh - clamp(20px, 4vw, 56px));
-    }
-
-    .left,
-    .right {
-      min-height: 0;
-      min-width: 0;
-      overflow: hidden;
-    }
-
-    @media (max-width: 800px) {
-      .app {
-        width: min(620px, 100%);
-        grid-template-columns: 1fr;
-        grid-template-rows: auto minmax(0, 1fr);
-        gap: 10px;
-        max-height: calc(100svh - 20px);
+    @media (min-width: 801px) {
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        min-height: 100%;
+        overflow: hidden;
       }
 
-      .card {
+      body {
+        min-height: 100svh;
+      }
+    }
+
+    /* =========================================================
+       DESKTOP
+       L'interface reste contenue dans le viewport.
+       ========================================================= */
+
+    @media (min-width: 801px) {
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        min-height: 100%;
+        overflow: hidden;
+      }
+
+      body {
+        min-height: 100svh;
+        padding: clamp(10px, 2vw, 28px);
+      }
+
+      .app {
+        max-height: calc(100svh - clamp(20px, 4vw, 56px));
+      }
+    }
+
+    /* =========================================================
+       MOBILE / TABLET
+       Flux naturel + scroll vertical.
+       Ne jamais bloquer la page sur iOS/Android.
+       ========================================================= */
+
+    @media (max-width: 800px) {
+      html,
+      body {
+        width: 100%;
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      body {
+        display: block;
+        min-height: 100svh;
+        padding: 10px;
+        overscroll-behavior-x: none;
+      }
+
+      .app {
+        width: min(620px, 100%);
+        max-width: 100%;
         max-height: none;
+        min-height: 0;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        gap: 10px;
+      }
+
+      .card,
+      .left,
+      .right {
+        min-height: 0;
+        max-height: none;
+        overflow: visible;
       }
 
       .left {
@@ -445,8 +487,7 @@
       }
 
       .right {
-        min-height: 0;
-        padding: clamp(16px, 4vw, 28px);
+        padding: clamp(18px, 5vw, 28px);
       }
 
       .features,
@@ -466,7 +507,19 @@
       }
 
       .qr-box {
-        width: min(44svh, 72vw, 330px);
+        width: min(72vw, 330px);
+      }
+
+      .url-preview,
+      .actions {
+        width: min(330px, 100%);
+      }
+
+      .action,
+      .generate {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        min-height: 46px;
       }
     }
 
@@ -477,7 +530,8 @@
 
       .app {
         width: 100%;
-        max-height: calc(100svh - 16px);
+        max-width: 100%;
+        gap: 10px;
       }
 
       .card {
@@ -529,7 +583,7 @@
       }
 
       .qr-box {
-        width: min(47svh, 78vw, 300px);
+        width: min(78vw, 300px);
         padding: 13px;
         border-radius: 17px;
       }
@@ -572,20 +626,6 @@
       }
     }
 
-
-    .action,
-    .generate {
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
-
-    @media (max-width: 800px) {
-      .action {
-        min-height: 46px;
-        cursor: pointer;
-      }
-    }
-
     @media print {
       @page {
         margin: 0;
@@ -594,15 +634,16 @@
 
       html,
       body {
-        width: 100%;
-        height: 100%;
-        min-height: 100%;
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 100% !important;
         overflow: hidden !important;
         background: #fff !important;
       }
 
       body {
         padding: 0 !important;
+        display: block !important;
       }
 
       body::before,
@@ -620,7 +661,9 @@
         height: 100vh !important;
         min-height: 100vh !important;
         max-height: none !important;
+        margin: 0 !important;
         display: grid !important;
+        grid-template-columns: 1fr !important;
         place-items: center !important;
         background: #fff !important;
         border: 0 !important;
@@ -635,9 +678,13 @@
         max-width: 500px !important;
         padding: 0 !important;
         background: #fff !important;
-        box-shadow: none !important;
         border: 0 !important;
+        box-shadow: none !important;
         border-radius: 0 !important;
+      }
+
+      #qrcode {
+        width: 100% !important;
       }
 
       #qrcode canvas,
@@ -645,6 +692,25 @@
         display: block !important;
         width: 100% !important;
         height: auto !important;
+      }
+    }
+
+    /* Final mobile override: never lock the document on touch devices. */
+    @media (max-width: 800px) {
+      html,
+      body {
+        height: auto !important;
+        min-height: 100% !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+
+      .app,
+      .card,
+      .left,
+      .right {
+        max-height: none !important;
       }
     }
   </style>
@@ -805,22 +871,6 @@
       return qrContainer.querySelector("canvas");
     }
 
-    function getQrDataUrl() {
-      const canvas = getQrCanvas();
-
-      if (canvas) {
-        return canvas.toDataURL("image/png");
-      }
-
-      const image = qrContainer.querySelector("img");
-
-      if (image && image.src) {
-        return image.src;
-      }
-
-      return null;
-    }
-
     function isMobileDevice() {
       return window.matchMedia("(max-width: 800px)").matches ||
         /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -834,18 +884,13 @@
         return;
       }
 
-      /*
-       * Sur ordinateur, un téléchargement classique est utilisé.
-       * Sur iPhone/iPad, Safari bloque ou ignore parfois le clic
-       * programmatique sur un lien <a download>. On utilise donc
-       * le menu de partage natif quand il est disponible.
-       */
+      // iOS/Android : utiliser le partage natif si disponible.
       if (isMobileDevice() && navigator.share && navigator.canShare) {
         try {
           const blob = await new Promise((resolve, reject) => {
             canvas.toBlob((result) => {
               if (result) resolve(result);
-              else reject(new Error("Impossible de créer l'image."));
+              else reject(new Error("PNG indisponible"));
             }, "image/png");
           });
 
@@ -863,43 +908,30 @@
           }
         } catch (error) {
           if (error && error.name === "AbortError") return;
-          // Si le partage n'est pas disponible, on utilise le fallback ci-dessous.
         }
       }
 
-      /*
-       * Fallback : Blob URL. Cela fonctionne mieux sur mobile que
-       * canvas.toDataURL() + <a download>. Sur iOS, l'image s'ouvre
-       * dans Safari et peut être enregistrée via le menu Partager.
-       */
+      // PC + fallback mobile : téléchargement classique.
       try {
         const blob = await new Promise((resolve, reject) => {
           canvas.toBlob((result) => {
             if (result) resolve(result);
-            else reject(new Error("Impossible de créer l'image."));
+            else reject(new Error("PNG indisponible"));
           }, "image/png");
         });
 
         const blobUrl = URL.createObjectURL(blob);
-        const newWindow = window.open(blobUrl, "_blank");
-
-        if (!newWindow) {
-          window.location.href = blobUrl;
-        }
-
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
-      } catch (error) {
-        // Dernier fallback pour les navigateurs anciens.
-        const dataUrl = getQrDataUrl();
-
-        if (!dataUrl) return;
-
         const link = document.createElement("a");
+        link.href = blobUrl;
         link.download = "qr-code.png";
-        link.href = dataUrl;
+        link.rel = "noopener";
         document.body.appendChild(link);
         link.click();
         link.remove();
+
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+      } catch (error) {
+        alert("Le téléchargement n'a pas pu être lancé.");
       }
     }
 
@@ -910,13 +942,15 @@
       }
 
       /*
-       * window.print() est déclenché directement depuis l'action
-       * utilisateur. Le CSS @media print ci-dessus ne conserve
-       * que le QR Code.
+       * Sur les navigateurs mobiles, window.print() dépend du navigateur
+       * et peut ne pas être disponible dans une WebView/PWA.
+       * On l'appelle directement depuis le clic utilisateur.
        */
-      requestAnimationFrame(() => {
+      if (typeof window.print === "function") {
         window.print();
-      });
+      } else {
+        alert("L'impression directe n'est pas disponible dans ce navigateur. Utilisez le menu Partager/Imprimer du navigateur.");
+      }
     }
 
     downloadBtn.addEventListener("click", downloadQr);
