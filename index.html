@@ -44,7 +44,7 @@
         linear-gradient(145deg, var(--bg), var(--bg-secondary) 65%, #060A12);
       display: grid;
       place-items: center;
-      padding: 28px;
+      padding: 32px 20px;
       overflow-x: hidden;
     }
 
@@ -67,6 +67,7 @@
       display: grid;
       grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr);
       gap: 16px;
+      margin: auto;
     }
 
     .card {
@@ -85,7 +86,7 @@
     }
 
     .right {
-      min-height: 600px;
+      min-height: 520px;
       padding: 34px;
       display: flex;
       flex-direction: column;
@@ -375,6 +376,8 @@
       border: 1px solid rgba(255,255,255,.10);
       background: rgba(255,255,255,.045);
       color: #E5E8EE;
+      text-align: center;
+      text-decoration: none;
     }
 
     .action:hover {
@@ -391,153 +394,52 @@
       background: rgba(94,230,168,.075);
     }
 
+    /* Ajustement PC : évite que la carte colle en haut/bas */
     @media (min-width: 801px) {
-      html, body {
-        width: 100%;
-        height: 100%;
-        min-height: 100%;
-        overflow: hidden;
-      }
       body {
-        min-height: 100svh;
+        min-height: 100vh;
+        padding: 40px 20px;
+        overflow-y: auto;
       }
     }
 
     @media (max-width: 800px) {
-      html, body {
-        width: 100%;
-        height: auto;
-        min-height: 100%;
-        overflow-x: hidden;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-      }
       body {
         display: block;
-        padding: 10px;
-        min-height: 100svh;
+        padding: 16px 10px 32px;
+        min-height: 100vh;
+        overflow-y: auto;
       }
+
       .app {
         width: min(620px, 100%);
-        max-width: 100%;
         margin: 0 auto;
         display: grid;
         grid-template-columns: 1fr;
-        grid-template-rows: auto auto;
-        gap: 10px;
+        gap: 14px;
       }
+
       .right {
-        min-height: min(620px, 72svh);
-        padding: clamp(16px, 4vw, 28px);
+        min-height: 0;
+        padding: clamp(20px, 4vw, 28px);
       }
+
       .features, .footer {
         display: none;
       }
+
       h1 {
         margin: 16px 0 9px;
         font-size: clamp(38px, 9vw, 52px);
       }
+
       .intro {
         margin-bottom: 18px;
         font-size: 13px;
       }
-      .qr-box {
-        width: min(44svh, 72vw, 330px);
-      }
-    }
 
-    @media (max-width: 520px) {
-      body {
-        padding: 8px;
-      }
-      .app {
-        width: 100%;
-        gap: 10px;
-      }
-      .card {
-        border-radius: 20px;
-      }
-      .left {
-        padding: 18px 15px;
-      }
-      h1 {
-        margin: 13px 0 7px;
-        font-size: clamp(34px, 11vw, 46px);
-      }
-      .input-wrap {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 4px;
-        padding: 5px;
-      }
-      input {
-        padding: 10px;
-        font-size: 13px;
-      }
-      .generate {
-        width: 100%;
-        padding: 10px 14px;
-      }
-      .right {
-        padding: 14px;
-      }
       .qr-box {
-        width: min(78vw, 300px);
-        padding: 13px;
-        border-radius: 17px;
-      }
-      .url-preview, .actions {
-        width: min(300px, 100%);
-      }
-      .actions {
-        gap: 6px;
-      }
-      .action {
-        padding: 10px 8px;
-      }
-    }
-
-    @media print {
-      @page {
-        margin: 0;
-      }
-      body {
-        background: #ffffff !important;
-        padding: 0 !important;
-      }
-      body::before,
-      .left,
-      .qr-title,
-      .url-preview,
-      .actions,
-      .empty {
-        display: none !important;
-      }
-      .app, .right, .card {
-        width: 100% !important;
-        min-height: 100vh !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        background: #ffffff !important;
-        border: 0 !important;
-        box-shadow: none !important;
-        border-radius: 0 !important;
-        padding: 0 !important;
-      }
-      .qr-box {
-        width: 300px !important;
-        height: 300px !important;
-        box-shadow: none !important;
-        border-radius: 0 !important;
-        padding: 0 !important;
-        background: transparent !important;
-      }
-      #qrcode canvas,
-      #qrcode img {
-        display: block !important;
-        width: 100% !important;
-        height: 100% !important;
+        width: min(260px, 70vw);
       }
     }
   </style>
@@ -694,6 +596,7 @@
       error.classList.remove("show");
     });
 
+    // Gestion intelligente du Téléchargement (avec fallback mobile / Instagram)
     downloadBtn.addEventListener("click", () => {
       const canvas = qrContainer.querySelector("canvas");
       const img = qrContainer.querySelector("img");
@@ -707,14 +610,28 @@
 
       if (!dataUrl) return;
 
-      const link = document.createElement("a");
-      link.download = "qr-code.png";
-      link.href = dataUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        // Sur mobile/Instagram : ouvre l'image dans un nouvel onglet pour sauvegarde (maintien/appui long)
+        const newTab = window.open();
+        if (newTab) {
+          newTab.document.write(`<body style="margin:0;display:grid;place-items:center;min-height:100vh;background:#05070D;"><img src="${dataUrl}" style="max-width:90%;border-radius:12px;"/><p style="color:#fff;font-family:sans-serif;font-size:14px;margin-top:16px;">Restez appuyé sur l'image pour la sauvegarder</p></body>`);
+        } else {
+          window.location.href = dataUrl;
+        }
+      } else {
+        // Sur PC : téléchargement direct classique
+        const link = document.createElement("a");
+        link.download = "qr-code.png";
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     });
 
+    // Impression compacte (1 seule page A4 à ~30%/40% de taille)
     printBtn.addEventListener("click", () => {
       const canvas = qrContainer.querySelector("canvas");
       const img = qrContainer.querySelector("img");
@@ -731,7 +648,6 @@
         return;
       }
 
-      // Fenêtre dédiée à l'impression (Compatible iOS Safari, Android & Ordinateur)
       const printWindow = window.open("", "_blank");
       if (!printWindow) {
         window.print();
@@ -745,26 +661,30 @@
           <meta charset="UTF-8">
           <title>Impression QR Code</title>
           <style>
-            body {
+            @page {
+              size: A4 portrait;
               margin: 0;
+            }
+            html, body {
+              margin: 0;
+              padding: 0;
+              width: 100%;
+              height: 100vh;
               display: flex;
+              flex-direction: column;
               justify-content: center;
               align-items: center;
-              min-height: 100vh;
               background: #ffffff;
             }
             img {
-              max-width: 80vw;
-              max-height: 80vh;
+              width: 220px;
+              height: 220px;
               object-fit: contain;
-            }
-            @page {
-              margin: 1cm;
             }
           </style>
         </head>
         <body>
-          <img src="${dataUrl}" alt="QR Code" onload="window.print(); window.close();">
+          <img src="${dataUrl}" alt="QR Code" onload="setTimeout(()=>{ window.print(); window.close(); }, 250);">
         </body>
         </html>
       `);
