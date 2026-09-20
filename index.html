@@ -42,7 +42,6 @@
       overflow-x: hidden;
     }
 
-    /* Bannière spéciale pour Instagram */
     .inapp-banner {
       display: none;
       width: min(1040px, 100%);
@@ -296,9 +295,8 @@
 </head>
 
 <body>
-  <!-- Message préventif si la page est ouverte dans Instagram -->
   <div id="inAppBanner" class="inapp-banner">
-    ⚠️ Pour télécharger ou imprimer facilement, appuie sur <strong><code>...</code> (en haut à droite)</strong> puis <strong>« Ouvrir dans Safari/Chrome »</strong>.
+    ⚠️ Pour télécharger ou imprimer directement, appuie sur <strong><code>...</code> (en haut à droite)</strong> puis <strong>« Ouvrir dans Safari/Chrome »</strong>.
   </div>
 
   <main class="app">
@@ -405,9 +403,11 @@
     const printBtn = document.getElementById("printBtn");
     const urlPreview = document.getElementById("urlPreview");
 
-    // Détection In-App Instagram
+    // Détection stricte d'Instagram / Facebook In-App Browser
     const ua = navigator.userAgent || navigator.vendor || window.opera;
-    if (/Instagram|FBAN|FBAV/i.test(ua)) {
+    const isInstagram = /Instagram|FBAN|FBAV/i.test(ua);
+
+    if (isInstagram) {
       document.getElementById("inAppBanner").classList.add("show");
     }
 
@@ -455,29 +455,53 @@
       error.classList.remove("show");
     });
 
-    // Téléchargement sécurisé via BLOB (Compatible mobile & stockage réduit)
+    // Téléchargement direct sur le Web / Fallback uniquement si Instagram
     downloadBtn.addEventListener("click", () => {
       const canvas = qrContainer.querySelector("canvas");
-      if (!canvas) return;
+      const img = qrContainer.querySelector("img");
 
-      canvas.toBlob((blob) => {
-        if (!blob) return;
+      let dataUrl = "";
+      if (canvas) {
+        dataUrl = canvas.toDataURL("image/png");
+      } else if (img && img.src) {
+        dataUrl = img.src;
+      }
 
-        const blobUrl = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.download = "qr-code.png";
-        link.href = blobUrl;
-        document.body.appendChild(link);
-        link.click();
+      if (!dataUrl) return;
 
-        setTimeout(() => {
+      if (isInstagram) {
+        // Seule exception : Instagram bloque l'API de téléchargement direct
+        const newTab = window.open();
+        if (newTab) {
+          newTab.document.write(`<body style="margin:0;display:grid;place-items:center;min-height:100vh;background:#05070D;"><img src="${dataUrl}" style="max-width:90%;border-radius:12px;"/><p style="color:#fff;font-family:sans-serif;font-size:14px;margin-top:16px;">Restez appuyé sur l'image pour la sauvegarder</p></body>`);
+        } else {
+          window.location.href = dataUrl;
+        }
+      } else {
+        // Navigation Web classique : Téléchargement direct binaire sans redirection
+        if (canvas && canvas.toBlob) {
+          canvas.toBlob((blob) => {
+            const blobUrl = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.download = "qr-code.png";
+            link.href = blobUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+          }, "image/png");
+        } else {
+          const link = document.createElement("a");
+          link.download = "qr-code.png";
+          link.href = dataUrl;
+          document.body.appendChild(link);
+          link.click();
           document.body.removeChild(link);
-          URL.revokeObjectURL(blobUrl);
-        }, 100);
-      }, "image/png");
+        }
+      }
     });
 
-    // Impression restreinte à 1 SEULE PAGE
+    // Impression garantie sur 1 SEULE PAGE
     printBtn.addEventListener("click", () => {
       const canvas = qrContainer.querySelector("canvas");
       const img = qrContainer.querySelector("img");
@@ -505,7 +529,7 @@
           <title>Impression QR Code</title>
           <style>
             @page {
-              size: A4 portrait;
+              size: portrait;
               margin: 0;
             }
             html, body {
@@ -520,8 +544,8 @@
               background: #ffffff;
             }
             img {
-              width: 200px;
-              height: 200px;
+              width: 240px;
+              height: 240px;
               object-fit: contain;
             }
           </style>
